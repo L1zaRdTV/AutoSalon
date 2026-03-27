@@ -22,7 +22,7 @@ namespace AutoSalon
         public MainForm(SessionUser user)
         {
             _user = user;
-            Text = $"AutoSalon — {_user.FullName}";
+            Text = $"Автосалон — {_user.FullName}";
             WindowState = FormWindowState.Maximized;
             Icon = SystemIcons.Application;
 
@@ -160,7 +160,7 @@ namespace AutoSalon
 
             layout.Controls.Add(new Label { Text = "Имя" }, 0, 0);
             layout.Controls.Add(txtName, 1, 0);
-            layout.Controls.Add(new Label { Text = "Email" }, 0, 1);
+            layout.Controls.Add(new Label { Text = "Эл. почта" }, 0, 1);
             layout.Controls.Add(txtEmail, 1, 1);
             layout.Controls.Add(new Label { Text = "Телефон" }, 0, 2);
             layout.Controls.Add(txtPhone, 1, 2);
@@ -195,7 +195,12 @@ namespace AutoSalon
             var grid = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
             UiAssets.ApplyGridStyle(grid);
             grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
-            tab.Enter += (_, __) => grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
+            LocalizeGridColumns(grid);
+            tab.Enter += (_, __) =>
+            {
+                grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
+                LocalizeGridColumns(grid);
+            };
             var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
             gridPanel.Controls.Add(grid);
             tab.Controls.Add(gridPanel);
@@ -239,6 +244,7 @@ WHERE (@Search = '' OR Title LIKE '%' + @Search + '%' OR Description LIKE '%' + 
 ORDER BY {orderBy}";
 
             _gridCatalog.DataSource = Database.Query(sql, new SqlParameter("@Search", _txtSearch.Text.Trim()));
+            LocalizeGridColumns(_gridCatalog);
         }
 
         private void GridCatalogOnRowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
@@ -291,6 +297,7 @@ ELSE
 FROM dbo.CartItems c
 JOIN dbo.Products p ON p.Id = c.ProductId
 WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
+            LocalizeGridColumns(_gridCart);
         }
 
         private void RemoveFromCart()
@@ -339,6 +346,7 @@ WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
             _gridOrders.DataSource = _user.Role == UserRole.Менеджер || _user.Role == UserRole.Администратор
                 ? Database.Query(sql)
                 : Database.Query(sql, new SqlParameter("@UserId", _user.Id));
+            LocalizeGridColumns(_gridOrders);
         }
 
         private void OpenProductEditor(int? productId)
@@ -376,6 +384,7 @@ WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
         private void LoadUsers()
         {
             _gridUsers.DataSource = Database.Query("SELECT Id, FullName, Email, Phone, Role, CreatedAt FROM dbo.Users ORDER BY Id DESC");
+            LocalizeGridColumns(_gridUsers);
         }
 
         private void ChangeUserRole()
@@ -400,6 +409,72 @@ WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
 
             Database.Execute("DELETE FROM dbo.Users WHERE Id=@Id", new SqlParameter("@Id", id));
             LoadUsers();
+        }
+
+        private static void LocalizeGridColumns(DataGridView grid)
+        {
+            if (grid?.Columns == null || grid.Columns.Count == 0)
+            {
+                return;
+            }
+
+            foreach (DataGridViewColumn column in grid.Columns)
+            {
+                switch (column.Name)
+                {
+                    case "Id":
+                        column.HeaderText = "ID";
+                        break;
+                    case "Title":
+                        column.HeaderText = "Название";
+                        break;
+                    case "Description":
+                        column.HeaderText = "Описание";
+                        break;
+                    case "Price":
+                        column.HeaderText = "Цена";
+                        break;
+                    case "OldPrice":
+                        column.HeaderText = "Старая цена";
+                        break;
+                    case "DiscountPercent":
+                        column.HeaderText = "Скидка, %";
+                        break;
+                    case "NewPrice":
+                        column.HeaderText = "Цена со скидкой";
+                        break;
+                    case "ImagePath":
+                        column.HeaderText = "Путь к изображению";
+                        break;
+                    case "Quantity":
+                        column.HeaderText = "Количество";
+                        break;
+                    case "Total":
+                        column.HeaderText = "Сумма";
+                        break;
+                    case "FullName":
+                        column.HeaderText = "ФИО";
+                        break;
+                    case "Email":
+                        column.HeaderText = "Эл. почта";
+                        break;
+                    case "Phone":
+                        column.HeaderText = "Телефон";
+                        break;
+                    case "Role":
+                        column.HeaderText = "Роль";
+                        break;
+                    case "CreatedAt":
+                        column.HeaderText = "Создано";
+                        break;
+                    case "TotalAmount":
+                        column.HeaderText = "Итого";
+                        break;
+                    case "Status":
+                        column.HeaderText = "Статус";
+                        break;
+                }
+            }
         }
     }
 }

@@ -13,7 +13,7 @@ namespace AutoSalon
 
         public AuthForm()
         {
-            Text = "AutoSalon — Вход";
+            Text = "Автосалон — Вход";
             StartPosition = FormStartPosition.CenterScreen;
             MinimumSize = new Size(420, 260);
             MaximumSize = new Size(520, 320);

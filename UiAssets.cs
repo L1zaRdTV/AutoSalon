@@ -36,7 +36,7 @@ namespace AutoSalon
                 using (var font = new Font("Segoe UI", 20, FontStyle.Bold))
                 using (var textBrush = new SolidBrush(TextPrimary))
                 {
-                    g.DrawString("AutoSalon", font, textBrush, 130, 30);
+                    g.DrawString("Автосалон", font, textBrush, 130, 30);
                 }
             }
 
@@ -92,6 +92,9 @@ namespace AutoSalon
                     tabControl.SizeMode = TabSizeMode.Fixed;
                     tabControl.Padding = new Point(10, 4);
                     tabControl.BackColor = Background;
+                    tabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
+                    tabControl.DrawItem -= DrawTabHeader;
+                    tabControl.DrawItem += DrawTabHeader;
                 }
                 else if (control is TabPage tabPage)
                 {
@@ -178,6 +181,29 @@ namespace AutoSalon
             grid.ColumnHeadersHeight = 30;
             grid.RowTemplate.Height = 26;
             grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+        }
+
+        private static void DrawTabHeader(object sender, DrawItemEventArgs e)
+        {
+            var tabs = sender as TabControl;
+            if (tabs == null || e.Index < 0 || e.Index >= tabs.TabPages.Count)
+            {
+                return;
+            }
+
+            var tab = tabs.TabPages[e.Index];
+            var selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+            var bg = selected ? AccentSoft : SurfaceMuted;
+            var fg = TextPrimary;
+
+            using (var brush = new SolidBrush(bg))
+            using (var textBrush = new SolidBrush(fg))
+            {
+                e.Graphics.FillRectangle(brush, e.Bounds);
+                var textRect = new Rectangle(e.Bounds.X, e.Bounds.Y + 4, e.Bounds.Width, e.Bounds.Height - 4);
+                TextRenderer.DrawText(e.Graphics, tab.Text, new Font("Tahoma", 9f, FontStyle.Bold), textRect, textBrush.Color,
+                    TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+            }
         }
     }
 }
