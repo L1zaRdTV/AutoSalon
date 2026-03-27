@@ -35,6 +35,14 @@ namespace AutoSalon
             };
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 14));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+            panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+
+            _txtLogin.Dock = DockStyle.Fill;
+            _txtPassword.Dock = DockStyle.Fill;
             panel.Controls.Add(new Label { Text = "Email / Телефон", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, 0);
             panel.Controls.Add(_txtLogin, 1, 0);
             panel.Controls.Add(new Label { Text = "Пароль", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft }, 0, 1);
@@ -50,6 +58,7 @@ namespace AutoSalon
 
             Controls.Add(panel);
             Controls.Add(logo);
+            UiAssets.ApplyFormTheme(this);
         }
 
         private void Register()

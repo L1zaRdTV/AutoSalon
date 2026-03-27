@@ -80,6 +80,57 @@ BEGIN
     );
 END;
 
+IF OBJECT_ID('dbo.ProductCategories', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ProductCategories(
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Name NVARCHAR(80) NOT NULL UNIQUE,
+        Description NVARCHAR(200) NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME()
+    );
+END;
+
+IF OBJECT_ID('dbo.ProductCategoryMap', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ProductCategoryMap(
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        ProductId INT NOT NULL,
+        CategoryId INT NOT NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+        CONSTRAINT FK_ProductCategoryMap_Products FOREIGN KEY(ProductId) REFERENCES dbo.Products(Id),
+        CONSTRAINT FK_ProductCategoryMap_ProductCategories FOREIGN KEY(CategoryId) REFERENCES dbo.ProductCategories(Id),
+        CONSTRAINT UQ_ProductCategoryMap UNIQUE(ProductId, CategoryId)
+    );
+END;
+
+IF OBJECT_ID('dbo.ServiceAppointments', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ServiceAppointments(
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        UserId INT NOT NULL,
+        CarModel NVARCHAR(120) NOT NULL,
+        AppointmentDate DATETIME2 NOT NULL,
+        Notes NVARCHAR(500) NULL,
+        Status NVARCHAR(40) NOT NULL DEFAULT N'Запланировано',
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+        CONSTRAINT FK_ServiceAppointments_Users FOREIGN KEY(UserId) REFERENCES dbo.Users(Id)
+    );
+END;
+
+IF OBJECT_ID('dbo.AuditLogs', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.AuditLogs(
+        Id BIGINT IDENTITY(1,1) PRIMARY KEY,
+        UserId INT NULL,
+        Action NVARCHAR(100) NOT NULL,
+        Entity NVARCHAR(80) NOT NULL,
+        EntityId INT NULL,
+        Details NVARCHAR(500) NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+        CONSTRAINT FK_AuditLogs_Users FOREIGN KEY(UserId) REFERENCES dbo.Users(Id)
+    );
+END;
+
 IF NOT EXISTS(SELECT 1 FROM dbo.Users WHERE Role = N'Администратор')
 BEGIN
     INSERT INTO dbo.Users(FullName, Email, Phone, PasswordHash, Role)
@@ -93,6 +144,25 @@ BEGIN
     (N'Toyota Camry', N'Седан бизнес-класса', 35000, 39000, 10),
     (N'BMW X5', N'Кроссовер премиум', 78000, NULL, NULL),
     (N'Диагностика двигателя', N'Полная компьютерная диагностика', 450, 600, 25);
+END;
+
+IF NOT EXISTS(SELECT 1 FROM dbo.ProductCategories)
+BEGIN
+    INSERT INTO dbo.ProductCategories(Name, Description)
+    VALUES
+    (N'Автомобили', N'Новые и поддержанные автомобили'),
+    (N'Сервис', N'Диагностика, ремонт и обслуживание'),
+    (N'Аксессуары', N'Дополнительное оборудование и аксессуары');
+END;
+
+IF NOT EXISTS(SELECT 1 FROM dbo.ProductCategoryMap)
+BEGIN
+    INSERT INTO dbo.ProductCategoryMap(ProductId, CategoryId)
+    SELECT p.Id, c.Id
+    FROM dbo.Products p
+    JOIN dbo.ProductCategories c
+      ON (p.Title LIKE N'%Диагностика%' AND c.Name = N'Сервис')
+      OR (p.Title NOT LIKE N'%Диагностика%' AND c.Name = N'Автомобили');
 END;";
                 using (var command = new SqlCommand(commandText, connection))
                 {
