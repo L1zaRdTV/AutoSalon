@@ -2,7 +2,6 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 
 namespace AutoSalon
@@ -12,8 +11,8 @@ namespace AutoSalon
         private readonly SessionUser _user;
         private readonly TabControl _tabs = new TabControl { Dock = DockStyle.Fill };
         private readonly DataGridView _gridCatalog = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
-        private readonly DataGridView _gridCart = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
-        private readonly DataGridView _gridOrders = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+        private readonly DataGridView _gridSales = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+        private readonly DataGridView _gridTestDrives = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
         private readonly DataGridView _gridUsers = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
         private readonly TextBox _txtSearch = new TextBox();
         private readonly ComboBox _cmbSort = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
@@ -29,8 +28,8 @@ namespace AutoSalon
             BuildUi();
             UiAssets.ApplyFormTheme(this);
             LoadCatalog();
-            LoadCart();
-            LoadOrders();
+            LoadSales();
+            LoadTestDrives();
             if (_user.Role == UserRole.Администратор)
             {
                 LoadUsers();
@@ -49,8 +48,8 @@ namespace AutoSalon
             Controls.Add(_lblRole);
 
             _tabs.TabPages.Add(BuildCatalogTab());
-            _tabs.TabPages.Add(BuildCartTab());
-            _tabs.TabPages.Add(BuildOrdersTab());
+            _tabs.TabPages.Add(BuildSalesTab());
+            _tabs.TabPages.Add(BuildTestDrivesTab());
             _tabs.TabPages.Add(BuildProfileTab());
 
             if (_user.Role == UserRole.Менеджер || _user.Role == UserRole.Администратор)
@@ -66,16 +65,13 @@ namespace AutoSalon
 
         private TabPage BuildCatalogTab()
         {
-            var tab = new TabPage("Каталог");
+            var tab = new TabPage("Каталог авто");
             var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6), BackColor = UiAssets.Background };
-            _cmbSort.Items.AddRange(new object[] { "По цене ↑", "По цене ↓", "По названию" });
+            _cmbSort.Items.AddRange(new object[] { "По цене ↑", "По цене ↓", "По модели" });
             _cmbSort.SelectedIndex = 0;
             var btnFilter = new Button { Text = "Поиск/Сортировка" };
             btnFilter.Click += (_, __) => LoadCatalog();
-            var btnAddToCart = new Button { Text = "Добавить в корзину" };
-            btnAddToCart.Click += (_, __) => AddToCart();
             UiAssets.StyleSecondaryButton(btnFilter);
-            UiAssets.StylePrimaryButton(btnAddToCart);
             _txtSearch.Width = 260;
             _cmbSort.Width = 160;
 
@@ -83,11 +79,9 @@ namespace AutoSalon
             top.Controls.Add(_txtSearch);
             top.Controls.Add(_cmbSort);
             top.Controls.Add(btnFilter);
-            top.Controls.Add(btnAddToCart);
 
             _gridCatalog.ReadOnly = true;
             _gridCatalog.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            _gridCatalog.RowPrePaint += GridCatalogOnRowPrePaint;
             UiAssets.ApplyGridStyle(_gridCatalog);
 
             var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
@@ -97,33 +91,23 @@ namespace AutoSalon
             return tab;
         }
 
-        private TabPage BuildCartTab()
+        private TabPage BuildSalesTab()
         {
-            var tab = new TabPage("Корзина");
-            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6), BackColor = UiAssets.Background };
-            var btnRemove = new Button { Text = "Удалить из корзины" };
-            btnRemove.Click += (_, __) => RemoveFromCart();
-            var btnCheckout = new Button { Text = "Оформить заказ" };
-            btnCheckout.Click += (_, __) => Checkout();
-            UiAssets.StyleSecondaryButton(btnRemove);
-            UiAssets.StylePrimaryButton(btnCheckout);
-            top.Controls.Add(btnRemove);
-            top.Controls.Add(btnCheckout);
+            var tab = new TabPage("Продажи");
             var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
-            gridPanel.Controls.Add(_gridCart);
+            gridPanel.Controls.Add(_gridSales);
             tab.Controls.Add(gridPanel);
-            tab.Controls.Add(top);
-            UiAssets.ApplyGridStyle(_gridCart);
+            UiAssets.ApplyGridStyle(_gridSales);
             return tab;
         }
 
-        private TabPage BuildOrdersTab()
+        private TabPage BuildTestDrivesTab()
         {
-            var tab = new TabPage("История заказов");
+            var tab = new TabPage("Тест-драйвы");
             var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
-            gridPanel.Controls.Add(_gridOrders);
+            gridPanel.Controls.Add(_gridTestDrives);
             tab.Controls.Add(gridPanel);
-            UiAssets.ApplyGridStyle(_gridOrders);
+            UiAssets.ApplyGridStyle(_gridTestDrives);
             return tab;
         }
 
@@ -172,14 +156,14 @@ namespace AutoSalon
 
         private TabPage BuildManagementTab()
         {
-            var tab = new TabPage("Управление товарами");
+            var tab = new TabPage("Управление авто");
             var panel = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6) };
             var btnAdd = new Button { Text = "Добавить" };
             var btnEdit = new Button { Text = "Редактировать" };
             var btnDelete = new Button { Text = "Удалить" };
-            btnAdd.Click += (_, __) => OpenProductEditor(null);
-            btnEdit.Click += (_, __) => OpenProductEditor(GetSelectedProductId());
-            btnDelete.Click += (_, __) => DeleteProduct();
+            btnAdd.Click += (_, __) => OpenCarEditor(null);
+            btnEdit.Click += (_, __) => OpenCarEditor(GetSelectedCarId());
+            btnDelete.Click += (_, __) => DeleteCar();
             panel.Controls.Add(btnAdd);
             panel.Controls.Add(btnEdit);
             panel.Controls.Add(btnDelete);
@@ -194,11 +178,11 @@ namespace AutoSalon
 
             var grid = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
             UiAssets.ApplyGridStyle(grid);
-            grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
+            grid.DataSource = QueryCars();
             LocalizeGridColumns(grid);
             tab.Enter += (_, __) =>
             {
-                grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
+                grid.DataSource = QueryCars();
                 LocalizeGridColumns(grid);
             };
             var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
@@ -228,138 +212,75 @@ namespace AutoSalon
             return tab;
         }
 
+        private DataTable QueryCars()
+        {
+            return Database.Query(@"SELECT c.Id, b.BrandName, c.Model, c.Year, c.Price, c.Mileage, c.Color, c.Engine, c.Transmission, c.Status
+FROM dbo.Cars c
+JOIN dbo.Brands b ON b.Id = c.BrandId
+ORDER BY c.Id DESC");
+        }
+
         private void LoadCatalog()
         {
-            var orderBy = "Price ASC";
-            if (_cmbSort.SelectedIndex == 1) orderBy = "Price DESC";
-            if (_cmbSort.SelectedIndex == 2) orderBy = "Title ASC";
+            var orderBy = "c.Price ASC";
+            if (_cmbSort.SelectedIndex == 1) orderBy = "c.Price DESC";
+            if (_cmbSort.SelectedIndex == 2) orderBy = "c.Model ASC";
 
-            var sql = $@"SELECT Id, Title, Description, Price, OldPrice, DiscountPercent,
-CASE WHEN OldPrice IS NOT NULL AND DiscountPercent IS NOT NULL
-THEN CAST(OldPrice * (100 - DiscountPercent) / 100.0 AS DECIMAL(12,2))
-ELSE Price END AS NewPrice,
-ImagePath
-FROM dbo.Products
-WHERE (@Search = '' OR Title LIKE '%' + @Search + '%' OR Description LIKE '%' + @Search + '%')
+            var sql = $@"SELECT c.Id, b.BrandName, c.Model, c.Year, c.Price, c.Mileage, c.Color, c.Engine, c.Transmission, c.Status
+FROM dbo.Cars c
+JOIN dbo.Brands b ON b.Id = c.BrandId
+WHERE (@Search = '' OR c.Model LIKE '%' + @Search + '%' OR b.BrandName LIKE '%' + @Search + '%')
 ORDER BY {orderBy}";
 
             _gridCatalog.DataSource = Database.Query(sql, new SqlParameter("@Search", _txtSearch.Text.Trim()));
             LocalizeGridColumns(_gridCatalog);
         }
 
-        private void GridCatalogOnRowPrePaint(object sender, DataGridViewRowPrePaintEventArgs e)
+        private void LoadSales()
         {
-            if (e.RowIndex < 0) return;
-            var row = _gridCatalog.Rows[e.RowIndex];
-            if (row.Cells["Price"].Value == DBNull.Value) return;
-            var price = Convert.ToDecimal(row.Cells["Price"].Value);
-            if (price > 1000)
-            {
-                row.DefaultCellStyle.BackColor = Color.FromArgb(255, 247, 221);
-                row.DefaultCellStyle.Font = new Font(_gridCatalog.Font, FontStyle.Bold);
-            }
-
-            if (row.Cells["OldPrice"].Value != DBNull.Value && row.Cells["DiscountPercent"].Value != DBNull.Value)
-            {
-                row.Cells["OldPrice"].Style.Font = new Font(_gridCatalog.Font, FontStyle.Strikeout);
-                row.Cells["NewPrice"].Style.ForeColor = Color.DarkGreen;
-            }
+            _gridSales.DataSource = Database.Query(@"SELECT s.Id, b.BrandName, c.Model, cu.LastName + ' ' + cu.FirstName AS CustomerName,
+       e.LastName + ' ' + e.FirstName AS EmployeeName, s.SaleDate, s.FinalPrice, s.Discount
+FROM dbo.Sales s
+JOIN dbo.Cars c ON c.Id = s.CarId
+JOIN dbo.Brands b ON b.Id = c.BrandId
+JOIN dbo.Customers cu ON cu.Id = s.CustomerId
+JOIN dbo.Employees e ON e.Id = s.EmployeeId
+ORDER BY s.SaleDate DESC");
+            LocalizeGridColumns(_gridSales);
         }
 
-        private int? GetSelectedProductId()
+        private void LoadTestDrives()
+        {
+            _gridTestDrives.DataSource = Database.Query(@"SELECT td.Id, b.BrandName, c.Model, cu.LastName + ' ' + cu.FirstName AS CustomerName,
+       ISNULL(e.LastName + ' ' + e.FirstName, N'—') AS EmployeeName, td.TestDate, td.DurationMinutes, td.Feedback
+FROM dbo.TestDrives td
+JOIN dbo.Cars c ON c.Id = td.CarId
+JOIN dbo.Brands b ON b.Id = c.BrandId
+JOIN dbo.Customers cu ON cu.Id = td.CustomerId
+LEFT JOIN dbo.Employees e ON e.Id = td.EmployeeId
+ORDER BY td.TestDate DESC");
+            LocalizeGridColumns(_gridTestDrives);
+        }
+
+        private int? GetSelectedCarId()
         {
             if (_gridCatalog.CurrentRow == null) return null;
             return Convert.ToInt32(_gridCatalog.CurrentRow.Cells["Id"].Value);
         }
 
-        private void AddToCart()
+        private void OpenCarEditor(int? carId)
         {
-            var productId = GetSelectedProductId();
-            if (!productId.HasValue)
-            {
-                MessageBox.Show("Выберите товар в каталоге.");
-                return;
-            }
-
-            Database.Execute(@"
-IF EXISTS(SELECT 1 FROM dbo.CartItems WHERE UserId=@UserId AND ProductId=@ProductId)
-    UPDATE dbo.CartItems SET Quantity = Quantity + 1 WHERE UserId=@UserId AND ProductId=@ProductId
-ELSE
-    INSERT INTO dbo.CartItems(UserId, ProductId, Quantity) VALUES(@UserId, @ProductId, 1)",
-                new SqlParameter("@UserId", _user.Id),
-                new SqlParameter("@ProductId", productId.Value));
-            LoadCart();
-        }
-
-        private void LoadCart()
-        {
-            _gridCart.DataSource = Database.Query(@"SELECT c.Id, p.Title, c.Quantity, p.Price, CAST(c.Quantity * p.Price AS DECIMAL(12,2)) AS Total
-FROM dbo.CartItems c
-JOIN dbo.Products p ON p.Id = c.ProductId
-WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
-            LocalizeGridColumns(_gridCart);
-        }
-
-        private void RemoveFromCart()
-        {
-            if (_gridCart.CurrentRow == null) return;
-            var id = Convert.ToInt32(_gridCart.CurrentRow.Cells["Id"].Value);
-            Database.Execute("DELETE FROM dbo.CartItems WHERE Id=@Id", new SqlParameter("@Id", id));
-            LoadCart();
-        }
-
-        private void Checkout()
-        {
-            var cart = Database.Query(@"SELECT c.ProductId, c.Quantity, p.Price FROM dbo.CartItems c JOIN dbo.Products p ON p.Id = c.ProductId WHERE c.UserId=@UserId", new SqlParameter("@UserId", _user.Id));
-            if (cart.Rows.Count == 0)
-            {
-                MessageBox.Show("Корзина пуста.");
-                return;
-            }
-
-            var total = cart.AsEnumerable().Sum(r => r.Field<int>("Quantity") * r.Field<decimal>("Price"));
-            var orderId = Convert.ToInt32(Database.Scalar(@"INSERT INTO dbo.Orders(UserId, TotalAmount) OUTPUT INSERTED.Id VALUES(@UserId, @Total)",
-                new SqlParameter("@UserId", _user.Id),
-                new SqlParameter("@Total", total)));
-
-            foreach (DataRow row in cart.Rows)
-            {
-                Database.Execute("INSERT INTO dbo.OrderItems(OrderId, ProductId, Quantity, UnitPrice) VALUES(@OrderId, @ProductId, @Quantity, @UnitPrice)",
-                    new SqlParameter("@OrderId", orderId),
-                    new SqlParameter("@ProductId", row["ProductId"]),
-                    new SqlParameter("@Quantity", row["Quantity"]),
-                    new SqlParameter("@UnitPrice", row["Price"]));
-            }
-
-            Database.Execute("DELETE FROM dbo.CartItems WHERE UserId=@UserId", new SqlParameter("@UserId", _user.Id));
-            LoadCart();
-            LoadOrders();
-            MessageBox.Show("Заказ оформлен.");
-        }
-
-        private void LoadOrders()
-        {
-            var sql = _user.Role == UserRole.Менеджер || _user.Role == UserRole.Администратор
-                ? "SELECT o.Id, u.FullName, o.TotalAmount, o.Status, o.CreatedAt FROM dbo.Orders o JOIN dbo.Users u ON u.Id=o.UserId ORDER BY o.CreatedAt DESC"
-                : "SELECT Id, TotalAmount, Status, CreatedAt FROM dbo.Orders WHERE UserId=@UserId ORDER BY CreatedAt DESC";
-
-            _gridOrders.DataSource = _user.Role == UserRole.Менеджер || _user.Role == UserRole.Администратор
-                ? Database.Query(sql)
-                : Database.Query(sql, new SqlParameter("@UserId", _user.Id));
-            LocalizeGridColumns(_gridOrders);
-        }
-
-        private void OpenProductEditor(int? productId)
-        {
-            using (var form = new ProductEditForm(productId))
+            using (var form = new ProductEditForm(carId))
             {
                 form.ShowDialog(this);
             }
 
             LoadCatalog();
+            LoadSales();
+            LoadTestDrives();
         }
 
-        private void DeleteProduct()
+        private void DeleteCar()
         {
             if (_user.Role != UserRole.Администратор)
             {
@@ -367,17 +288,17 @@ WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
                 return;
             }
 
-            var productId = GetSelectedProductId();
-            if (!productId.HasValue) return;
+            var carId = GetSelectedCarId();
+            if (!carId.HasValue) return;
 
             try
             {
-                Database.Execute("DELETE FROM dbo.Products WHERE Id=@Id", new SqlParameter("@Id", productId.Value));
+                Database.Execute("DELETE FROM dbo.Cars WHERE Id=@Id", new SqlParameter("@Id", carId.Value));
                 LoadCatalog();
             }
             catch (SqlException)
             {
-                MessageBox.Show("Невозможно удалить товар, так как он присутствует в одном или нескольких заказах.", "Ограничение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Невозможно удалить автомобиль, так как он связан с продажами/тест-драйвами/сервисом.", "Ограничение", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -422,57 +343,29 @@ WHERE c.UserId = @UserId", new SqlParameter("@UserId", _user.Id));
             {
                 switch (column.Name)
                 {
-                    case "Id":
-                        column.HeaderText = "ID";
-                        break;
-                    case "Title":
-                        column.HeaderText = "Название";
-                        break;
-                    case "Description":
-                        column.HeaderText = "Описание";
-                        break;
-                    case "Price":
-                        column.HeaderText = "Цена";
-                        break;
-                    case "OldPrice":
-                        column.HeaderText = "Старая цена";
-                        break;
-                    case "DiscountPercent":
-                        column.HeaderText = "Скидка, %";
-                        break;
-                    case "NewPrice":
-                        column.HeaderText = "Цена со скидкой";
-                        break;
-                    case "ImagePath":
-                        column.HeaderText = "Путь к изображению";
-                        break;
-                    case "Quantity":
-                        column.HeaderText = "Количество";
-                        break;
-                    case "Total":
-                        column.HeaderText = "Сумма";
-                        break;
-                    case "FullName":
-                        column.HeaderText = "ФИО";
-                        break;
-                    case "Email":
-                        column.HeaderText = "Эл. почта";
-                        break;
-                    case "Phone":
-                        column.HeaderText = "Телефон";
-                        break;
-                    case "Role":
-                        column.HeaderText = "Роль";
-                        break;
-                    case "CreatedAt":
-                        column.HeaderText = "Создано";
-                        break;
-                    case "TotalAmount":
-                        column.HeaderText = "Итого";
-                        break;
-                    case "Status":
-                        column.HeaderText = "Статус";
-                        break;
+                    case "Id": column.HeaderText = "ID"; break;
+                    case "BrandName": column.HeaderText = "Марка"; break;
+                    case "Model": column.HeaderText = "Модель"; break;
+                    case "Year": column.HeaderText = "Год"; break;
+                    case "Price": column.HeaderText = "Цена"; break;
+                    case "Mileage": column.HeaderText = "Пробег"; break;
+                    case "Color": column.HeaderText = "Цвет"; break;
+                    case "Engine": column.HeaderText = "Двигатель"; break;
+                    case "Transmission": column.HeaderText = "КПП"; break;
+                    case "Status": column.HeaderText = "Статус"; break;
+                    case "SaleDate": column.HeaderText = "Дата продажи"; break;
+                    case "FinalPrice": column.HeaderText = "Итоговая цена"; break;
+                    case "Discount": column.HeaderText = "Скидка"; break;
+                    case "CustomerName": column.HeaderText = "Клиент"; break;
+                    case "EmployeeName": column.HeaderText = "Сотрудник"; break;
+                    case "TestDate": column.HeaderText = "Дата тест-драйва"; break;
+                    case "DurationMinutes": column.HeaderText = "Длительность (мин)"; break;
+                    case "Feedback": column.HeaderText = "Отзыв"; break;
+                    case "FullName": column.HeaderText = "ФИО"; break;
+                    case "Email": column.HeaderText = "Эл. почта"; break;
+                    case "Phone": column.HeaderText = "Телефон"; break;
+                    case "Role": column.HeaderText = "Роль"; break;
+                    case "CreatedAt": column.HeaderText = "Создано"; break;
                 }
             }
         }

@@ -91,7 +91,7 @@ namespace AutoSalon
                 FullName = row["FullName"].ToString(),
                 Email = row["Email"].ToString(),
                 Phone = row["Phone"].ToString(),
-                Role = (UserRole)Enum.Parse(typeof(UserRole), row["Role"].ToString())
+                Role = Enum.TryParse(row["Role"].ToString(), out UserRole role) ? role : UserRole.Пользователь
             };
 
             Hide();
