@@ -2,7 +2,6 @@ using System;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -29,152 +28,17 @@ BEGIN
     );
 END;
 
-IF OBJECT_ID('dbo.Products', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.Products(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        Title NVARCHAR(120) NOT NULL,
-        Description NVARCHAR(400) NULL,
-        Price DECIMAL(12,2) NOT NULL,
-        OldPrice DECIMAL(12,2) NULL,
-        DiscountPercent INT NULL,
-        ImagePath NVARCHAR(260) NULL,
-        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME()
-    );
-END;
-
-IF OBJECT_ID('dbo.Orders', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.Orders(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        UserId INT NOT NULL,
-        TotalAmount DECIMAL(12,2) NOT NULL,
-        Status NVARCHAR(40) NOT NULL DEFAULT N'Новый',
-        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-        CONSTRAINT FK_Orders_Users FOREIGN KEY(UserId) REFERENCES dbo.Users(Id)
-    );
-END;
-
-IF OBJECT_ID('dbo.OrderItems', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.OrderItems(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        OrderId INT NOT NULL,
-        ProductId INT NOT NULL,
-        Quantity INT NOT NULL,
-        UnitPrice DECIMAL(12,2) NOT NULL,
-        CONSTRAINT FK_OrderItems_Orders FOREIGN KEY(OrderId) REFERENCES dbo.Orders(Id),
-        CONSTRAINT FK_OrderItems_Products FOREIGN KEY(ProductId) REFERENCES dbo.Products(Id)
-    );
-END;
-
-IF OBJECT_ID('dbo.CartItems', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.CartItems(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        UserId INT NOT NULL,
-        ProductId INT NOT NULL,
-        Quantity INT NOT NULL,
-        CONSTRAINT FK_CartItems_Users FOREIGN KEY(UserId) REFERENCES dbo.Users(Id),
-        CONSTRAINT FK_CartItems_Products FOREIGN KEY(ProductId) REFERENCES dbo.Products(Id)
-    );
-END;
-
-IF OBJECT_ID('dbo.ProductCategories', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.ProductCategories(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        Name NVARCHAR(80) NOT NULL UNIQUE,
-        Description NVARCHAR(200) NULL,
-        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME()
-    );
-END;
-
-IF OBJECT_ID('dbo.ProductCategoryMap', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.ProductCategoryMap(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        ProductId INT NOT NULL,
-        CategoryId INT NOT NULL,
-        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-        CONSTRAINT FK_ProductCategoryMap_Products FOREIGN KEY(ProductId) REFERENCES dbo.Products(Id),
-        CONSTRAINT FK_ProductCategoryMap_ProductCategories FOREIGN KEY(CategoryId) REFERENCES dbo.ProductCategories(Id),
-        CONSTRAINT UQ_ProductCategoryMap UNIQUE(ProductId, CategoryId)
-    );
-END;
-
-IF OBJECT_ID('dbo.ServiceAppointments', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.ServiceAppointments(
-        Id INT IDENTITY(1,1) PRIMARY KEY,
-        UserId INT NOT NULL,
-        CarModel NVARCHAR(120) NOT NULL,
-        AppointmentDate DATETIME2 NOT NULL,
-        Notes NVARCHAR(500) NULL,
-        Status NVARCHAR(40) NOT NULL DEFAULT N'Запланировано',
-        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-        CONSTRAINT FK_ServiceAppointments_Users FOREIGN KEY(UserId) REFERENCES dbo.Users(Id)
-    );
-END;
-
-IF OBJECT_ID('dbo.AuditLogs', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.AuditLogs(
-        Id BIGINT IDENTITY(1,1) PRIMARY KEY,
-        UserId INT NULL,
-        Action NVARCHAR(100) NOT NULL,
-        Entity NVARCHAR(80) NOT NULL,
-        EntityId INT NULL,
-        Details NVARCHAR(500) NULL,
-        CreatedAt DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-        CONSTRAINT FK_AuditLogs_Users FOREIGN KEY(UserId) REFERENCES dbo.Users(Id)
-    );
-END;
-
 IF NOT EXISTS(SELECT 1 FROM dbo.Users WHERE Role = N'Администратор')
 BEGIN
     INSERT INTO dbo.Users(FullName, Email, Phone, PasswordHash, Role)
     VALUES(N'Главный администратор', N'admin@autosalon.local', N'+70000000000', @Hash, N'Администратор');
-END;
-
-IF NOT EXISTS(SELECT 1 FROM dbo.Products)
-BEGIN
-    INSERT INTO dbo.Products(Title, Description, Price, OldPrice, DiscountPercent)
-    VALUES
-    (N'Toyota Camry', N'Седан бизнес-класса', 35000, 39000, 10),
-    (N'BMW X5', N'Кроссовер премиум', 78000, NULL, NULL),
-    (N'Диагностика двигателя', N'Полная компьютерная диагностика', 450, 600, 25);
-END;
-
-IF NOT EXISTS(SELECT 1 FROM dbo.ProductCategories)
-BEGIN
-    INSERT INTO dbo.ProductCategories(Name, Description)
-    VALUES
-    (N'Автомобили', N'Новые и поддержанные автомобили'),
-    (N'Сервис', N'Диагностика, ремонт и обслуживание'),
-    (N'Аксессуары', N'Дополнительное оборудование и аксессуары');
-END;
-
-IF NOT EXISTS(SELECT 1 FROM dbo.ProductCategoryMap)
-BEGIN
-    INSERT INTO dbo.ProductCategoryMap(ProductId, CategoryId)
-    SELECT p.Id, c.Id
-    FROM dbo.Products p
-    JOIN dbo.ProductCategories c
-      ON (p.Title LIKE N'%Диагностика%' AND c.Name = N'Сервис')
-      OR (p.Title NOT LIKE N'%Диагностика%' AND c.Name = N'Автомобили');
 END;";
+
                 using (var command = new SqlCommand(commandText, connection))
                 {
                     command.Parameters.AddWithValue("@Hash", SecurityHelper.HashPassword("Admin123!"));
                     command.ExecuteNonQuery();
                 }
-            }
-
-            var imagesPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ProductImages");
-            if (!Directory.Exists(imagesPath))
-            {
-                Directory.CreateDirectory(imagesPath);
             }
         }
     }
@@ -183,7 +47,7 @@ END;";
     {
         public static string ConnectionString =>
             ConfigurationManager.ConnectionStrings["AutoSalonDb"]?.ConnectionString
-            ?? @"Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Initial Catalog=AutoSalonDb;";
+            ?? @"Server=(localdb)\MSSQLLocalDB;Integrated Security=true;Initial Catalog=AutoSalonDB;";
 
         public static DataTable Query(string sql, params SqlParameter[] parameters)
         {

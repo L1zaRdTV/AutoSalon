@@ -8,136 +8,160 @@ namespace AutoSalon
 {
     public class ProductEditForm : Form
     {
-        private readonly int? _productId;
-        private readonly TextBox _txtTitle = new TextBox();
-        private readonly TextBox _txtDescription = new TextBox();
-        private readonly NumericUpDown _numPrice = new NumericUpDown { Maximum = 10000000, DecimalPlaces = 2 };
-        private readonly NumericUpDown _numOldPrice = new NumericUpDown { Maximum = 10000000, DecimalPlaces = 2 };
-        private readonly NumericUpDown _numDiscount = new NumericUpDown { Maximum = 100, Minimum = 0 };
-        private readonly TextBox _txtImagePath = new TextBox { ReadOnly = true };
+        private readonly int? _carId;
+        private readonly ComboBox _cmbBrand = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        private readonly TextBox _txtModel = new TextBox();
+        private readonly NumericUpDown _numYear = new NumericUpDown { Minimum = 1980, Maximum = 2100, Value = 2023 };
+        private readonly NumericUpDown _numPrice = new NumericUpDown { Maximum = 100000000, DecimalPlaces = 2 };
+        private readonly NumericUpDown _numMileage = new NumericUpDown { Maximum = 1000000 };
+        private readonly TextBox _txtColor = new TextBox();
+        private readonly TextBox _txtVin = new TextBox();
+        private readonly TextBox _txtEngine = new TextBox();
+        private readonly ComboBox _cmbTransmission = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
+        private readonly ComboBox _cmbStatus = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
 
-        public ProductEditForm(int? productId)
+        public ProductEditForm(int? carId)
         {
-            _productId = productId;
-            Text = _productId.HasValue ? "Редактирование товара" : "Новый товар";
+            _carId = carId;
+            Text = _carId.HasValue ? "Редактирование авто" : "Новый автомобиль";
             Icon = SystemIcons.Application;
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(560, 400);
+            MinimumSize = new Size(620, 520);
 
             var card = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(12));
-            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(16), ColumnCount = 3, RowCount = 8 };
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(16), ColumnCount = 2, RowCount = 12 };
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
-            layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
+            for (var i = 0; i < 11; i++)
+            {
+                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
+            }
             layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
-            layout.Controls.Add(new Label { Text = "Название" }, 0, 0);
-            layout.Controls.Add(_txtTitle, 1, 0);
-            layout.Controls.Add(new Label { Text = "Описание" }, 0, 1);
-            layout.Controls.Add(_txtDescription, 1, 1);
-            layout.Controls.Add(new Label { Text = "Цена" }, 0, 2);
-            layout.Controls.Add(_numPrice, 1, 2);
-            layout.Controls.Add(new Label { Text = "Старая цена" }, 0, 3);
-            layout.Controls.Add(_numOldPrice, 1, 3);
-            layout.Controls.Add(new Label { Text = "Скидка, %" }, 0, 4);
-            layout.Controls.Add(_numDiscount, 1, 4);
-            layout.Controls.Add(new Label { Text = "Изображение" }, 0, 5);
-            layout.Controls.Add(_txtImagePath, 1, 5);
+            _cmbTransmission.Items.AddRange(new object[] { "Automatic", "Manual", "CVT", "Robot" });
+            _cmbTransmission.SelectedIndex = 0;
+            _cmbStatus.Items.AddRange(new object[] { "Available", "Sold", "Reserved", "Service" });
+            _cmbStatus.SelectedIndex = 0;
 
-            var btnImage = new Button { Text = "Выбрать..." };
-            btnImage.Click += (_, __) => SelectImage();
-            UiAssets.StyleSecondaryButton(btnImage);
-            layout.Controls.Add(btnImage, 2, 5);
+            layout.Controls.Add(new Label { Text = "Марка" }, 0, 0);
+            layout.Controls.Add(_cmbBrand, 1, 0);
+            layout.Controls.Add(new Label { Text = "Модель" }, 0, 1);
+            layout.Controls.Add(_txtModel, 1, 1);
+            layout.Controls.Add(new Label { Text = "Год" }, 0, 2);
+            layout.Controls.Add(_numYear, 1, 2);
+            layout.Controls.Add(new Label { Text = "Цена" }, 0, 3);
+            layout.Controls.Add(_numPrice, 1, 3);
+            layout.Controls.Add(new Label { Text = "Пробег" }, 0, 4);
+            layout.Controls.Add(_numMileage, 1, 4);
+            layout.Controls.Add(new Label { Text = "Цвет" }, 0, 5);
+            layout.Controls.Add(_txtColor, 1, 5);
+            layout.Controls.Add(new Label { Text = "VIN" }, 0, 6);
+            layout.Controls.Add(_txtVin, 1, 6);
+            layout.Controls.Add(new Label { Text = "Двигатель" }, 0, 7);
+            layout.Controls.Add(_txtEngine, 1, 7);
+            layout.Controls.Add(new Label { Text = "КПП" }, 0, 8);
+            layout.Controls.Add(_cmbTransmission, 1, 8);
+            layout.Controls.Add(new Label { Text = "Статус" }, 0, 9);
+            layout.Controls.Add(_cmbStatus, 1, 9);
 
             var btnSave = new Button { Text = "Сохранить", Dock = DockStyle.Fill };
-            btnSave.Click += (_, __) => SaveProduct();
+            btnSave.Click += (_, __) => SaveCar();
             UiAssets.StylePrimaryButton(btnSave);
-            layout.Controls.Add(btnSave, 1, 6);
+            layout.Controls.Add(btnSave, 1, 10);
 
             card.Controls.Add(layout);
             Controls.Add(card);
 
-            if (_productId.HasValue)
+            LoadBrands();
+            if (_carId.HasValue)
             {
-                LoadProduct();
+                LoadCar();
             }
 
             UiAssets.ApplyFormTheme(this);
         }
 
-        private void SelectImage()
+        private void LoadBrands()
         {
-            using (var dialog = new OpenFileDialog())
-            {
-                dialog.Filter = "Изображения|*.png;*.jpg;*.jpeg;*.bmp";
-                if (dialog.ShowDialog(this) == DialogResult.OK)
-                {
-                    _txtImagePath.Text = ValidationHelper.CopyProductImage(dialog.FileName);
-                }
-            }
+            var brands = Database.Query("SELECT Id, BrandName FROM dbo.Brands ORDER BY BrandName");
+            _cmbBrand.DataSource = brands;
+            _cmbBrand.DisplayMember = "BrandName";
+            _cmbBrand.ValueMember = "Id";
         }
 
-        private void LoadProduct()
+        private void LoadCar()
         {
-            var table = Database.Query("SELECT TOP 1 * FROM dbo.Products WHERE Id=@Id", new SqlParameter("@Id", _productId.Value));
+            var table = Database.Query("SELECT TOP 1 * FROM dbo.Cars WHERE Id=@Id", new SqlParameter("@Id", _carId.Value));
             if (table.Rows.Count == 0)
             {
                 return;
             }
 
             var row = table.Rows[0];
-            _txtTitle.Text = row["Title"].ToString();
-            _txtDescription.Text = row["Description"].ToString();
-            _numPrice.Value = Convert.ToDecimal(row["Price"]);
-            _numOldPrice.Value = row["OldPrice"] == DBNull.Value ? 0 : Convert.ToDecimal(row["OldPrice"]);
-            _numDiscount.Value = row["DiscountPercent"] == DBNull.Value ? 0 : Convert.ToDecimal(row["DiscountPercent"]);
-            _txtImagePath.Text = row["ImagePath"].ToString();
+            _cmbBrand.SelectedValue = Convert.ToInt32(row["BrandId"]);
+            _txtModel.Text = row["Model"].ToString();
+            _numYear.Value = row["Year"] == DBNull.Value ? _numYear.Minimum : Convert.ToDecimal(row["Year"]);
+            _numPrice.Value = row["Price"] == DBNull.Value ? 0 : Convert.ToDecimal(row["Price"]);
+            _numMileage.Value = row["Mileage"] == DBNull.Value ? 0 : Convert.ToDecimal(row["Mileage"]);
+            _txtColor.Text = row["Color"].ToString();
+            _txtVin.Text = row["VIN"].ToString();
+            _txtEngine.Text = row["Engine"].ToString();
+            SelectComboValue(_cmbTransmission, row["Transmission"].ToString());
+            SelectComboValue(_cmbStatus, row["Status"].ToString());
         }
 
-        private void SaveProduct()
+        private static void SelectComboValue(ComboBox combo, string value)
         {
-            if (string.IsNullOrWhiteSpace(_txtTitle.Text) || _numPrice.Value <= 0)
+            var index = combo.FindStringExact(value ?? string.Empty);
+            combo.SelectedIndex = index >= 0 ? index : 0;
+        }
+
+        private void SaveCar()
+        {
+            if (_cmbBrand.SelectedValue == null || string.IsNullOrWhiteSpace(_txtModel.Text) || _numPrice.Value <= 0)
             {
-                MessageBox.Show("Название и цена обязательны.");
+                MessageBox.Show("Марка, модель и цена обязательны.");
                 return;
             }
 
-            if (_numDiscount.Value > 0 && _numOldPrice.Value <= 0)
+            var vin = _txtVin.Text.Trim();
+            if (!string.IsNullOrWhiteSpace(vin) && vin.Length != 17)
             {
-                MessageBox.Show("Для скидки необходимо указать старую цену.");
+                MessageBox.Show("VIN должен содержать 17 символов или быть пустым.");
                 return;
             }
 
-            if (_productId.HasValue)
+            if (_carId.HasValue)
             {
-                Database.Execute(@"UPDATE dbo.Products
-SET Title=@Title, Description=@Description, Price=@Price, OldPrice=@OldPrice, DiscountPercent=@DiscountPercent, ImagePath=@ImagePath
+                Database.Execute(@"UPDATE dbo.Cars
+SET BrandId=@BrandId, Model=@Model, Year=@Year, Price=@Price, Mileage=@Mileage, Color=@Color, VIN=@VIN, Engine=@Engine, Transmission=@Transmission, Status=@Status
 WHERE Id=@Id",
-                    new SqlParameter("@Title", _txtTitle.Text.Trim()),
-                    new SqlParameter("@Description", _txtDescription.Text.Trim()),
+                    new SqlParameter("@BrandId", _cmbBrand.SelectedValue),
+                    new SqlParameter("@Model", _txtModel.Text.Trim()),
+                    new SqlParameter("@Year", (int)_numYear.Value),
                     new SqlParameter("@Price", _numPrice.Value),
-                    new SqlParameter("@OldPrice", _numOldPrice.Value > 0 ? (object)_numOldPrice.Value : DBNull.Value),
-                    new SqlParameter("@DiscountPercent", _numDiscount.Value > 0 ? (object)_numDiscount.Value : DBNull.Value),
-                    new SqlParameter("@ImagePath", string.IsNullOrWhiteSpace(_txtImagePath.Text) ? (object)DBNull.Value : _txtImagePath.Text),
-                    new SqlParameter("@Id", _productId.Value));
+                    new SqlParameter("@Mileage", (int)_numMileage.Value),
+                    new SqlParameter("@Color", string.IsNullOrWhiteSpace(_txtColor.Text) ? (object)DBNull.Value : _txtColor.Text.Trim()),
+                    new SqlParameter("@VIN", string.IsNullOrWhiteSpace(vin) ? (object)DBNull.Value : vin),
+                    new SqlParameter("@Engine", string.IsNullOrWhiteSpace(_txtEngine.Text) ? (object)DBNull.Value : _txtEngine.Text.Trim()),
+                    new SqlParameter("@Transmission", _cmbTransmission.SelectedItem.ToString()),
+                    new SqlParameter("@Status", _cmbStatus.SelectedItem.ToString()),
+                    new SqlParameter("@Id", _carId.Value));
             }
             else
             {
-                Database.Execute(@"INSERT INTO dbo.Products(Title, Description, Price, OldPrice, DiscountPercent, ImagePath)
-VALUES(@Title, @Description, @Price, @OldPrice, @DiscountPercent, @ImagePath)",
-                    new SqlParameter("@Title", _txtTitle.Text.Trim()),
-                    new SqlParameter("@Description", _txtDescription.Text.Trim()),
+                Database.Execute(@"INSERT INTO dbo.Cars(BrandId, Model, Year, Price, Mileage, Color, VIN, Engine, Transmission, Status)
+VALUES(@BrandId, @Model, @Year, @Price, @Mileage, @Color, @VIN, @Engine, @Transmission, @Status)",
+                    new SqlParameter("@BrandId", _cmbBrand.SelectedValue),
+                    new SqlParameter("@Model", _txtModel.Text.Trim()),
+                    new SqlParameter("@Year", (int)_numYear.Value),
                     new SqlParameter("@Price", _numPrice.Value),
-                    new SqlParameter("@OldPrice", _numOldPrice.Value > 0 ? (object)_numOldPrice.Value : DBNull.Value),
-                    new SqlParameter("@DiscountPercent", _numDiscount.Value > 0 ? (object)_numDiscount.Value : DBNull.Value),
-                    new SqlParameter("@ImagePath", string.IsNullOrWhiteSpace(_txtImagePath.Text) ? (object)DBNull.Value : _txtImagePath.Text));
+                    new SqlParameter("@Mileage", (int)_numMileage.Value),
+                    new SqlParameter("@Color", string.IsNullOrWhiteSpace(_txtColor.Text) ? (object)DBNull.Value : _txtColor.Text.Trim()),
+                    new SqlParameter("@VIN", string.IsNullOrWhiteSpace(vin) ? (object)DBNull.Value : vin),
+                    new SqlParameter("@Engine", string.IsNullOrWhiteSpace(_txtEngine.Text) ? (object)DBNull.Value : _txtEngine.Text.Trim()),
+                    new SqlParameter("@Transmission", _cmbTransmission.SelectedItem.ToString()),
+                    new SqlParameter("@Status", _cmbStatus.SelectedItem.ToString()));
             }
 
             DialogResult = DialogResult.OK;
