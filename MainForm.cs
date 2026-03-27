@@ -27,6 +27,7 @@ namespace AutoSalon
             Icon = SystemIcons.Application;
 
             BuildUi();
+            UiAssets.ApplyFormTheme(this);
             LoadCatalog();
             LoadCart();
             LoadOrders();
@@ -40,6 +41,9 @@ namespace AutoSalon
         {
             _lblRole.Text = $"Роль: {_user.Role}";
             _lblRole.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+            _lblRole.Padding = new Padding(12, 6, 0, 0);
+            _lblRole.BackColor = UiAssets.Accent;
+            _lblRole.ForeColor = Color.White;
 
             Controls.Add(_tabs);
             Controls.Add(_lblRole);
@@ -63,7 +67,7 @@ namespace AutoSalon
         private TabPage BuildCatalogTab()
         {
             var tab = new TabPage("Каталог");
-            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 42 };
+            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 50, Padding = new Padding(8), BackColor = UiAssets.Background };
             _cmbSort.Items.AddRange(new object[] { "По цене ↑", "По цене ↓", "По названию" });
             _cmbSort.SelectedIndex = 0;
             var btnFilter = new Button { Text = "Поиск/Сортировка" };
@@ -80,6 +84,7 @@ namespace AutoSalon
             _gridCatalog.ReadOnly = true;
             _gridCatalog.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             _gridCatalog.RowPrePaint += GridCatalogOnRowPrePaint;
+            UiAssets.ApplyGridStyle(_gridCatalog);
 
             tab.Controls.Add(_gridCatalog);
             tab.Controls.Add(top);
@@ -89,7 +94,7 @@ namespace AutoSalon
         private TabPage BuildCartTab()
         {
             var tab = new TabPage("Корзина");
-            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 42 };
+            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 50, Padding = new Padding(8), BackColor = UiAssets.Background };
             var btnRemove = new Button { Text = "Удалить из корзины" };
             btnRemove.Click += (_, __) => RemoveFromCart();
             var btnCheckout = new Button { Text = "Оформить заказ" };
@@ -98,6 +103,7 @@ namespace AutoSalon
             top.Controls.Add(btnCheckout);
             tab.Controls.Add(_gridCart);
             tab.Controls.Add(top);
+            UiAssets.ApplyGridStyle(_gridCart);
             return tab;
         }
 
@@ -105,6 +111,7 @@ namespace AutoSalon
         {
             var tab = new TabPage("История заказов");
             tab.Controls.Add(_gridOrders);
+            UiAssets.ApplyGridStyle(_gridOrders);
             return tab;
         }
 
@@ -167,6 +174,7 @@ namespace AutoSalon
             }
 
             var grid = new DataGridView { Dock = DockStyle.Fill, ReadOnly = true, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
+            UiAssets.ApplyGridStyle(grid);
             grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
             tab.Enter += (_, __) => grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
             tab.Controls.Add(grid);
@@ -186,6 +194,7 @@ namespace AutoSalon
             panel.Controls.Add(btnDelete);
             tab.Controls.Add(_gridUsers);
             tab.Controls.Add(panel);
+            UiAssets.ApplyGridStyle(_gridUsers);
             return tab;
         }
 

@@ -22,6 +22,12 @@ namespace AutoSalon
             var panel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 2, RowCount = 6 };
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+            panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             panel.Controls.Add(new Label { Text = "ФИО" }, 0, 0);
             panel.Controls.Add(_txtName, 1, 0);
@@ -38,6 +44,7 @@ namespace AutoSalon
             panel.Controls.Add(btn, 1, 4);
 
             Controls.Add(panel);
+            UiAssets.ApplyFormTheme(this);
         }
 
         private void CreateUser()
