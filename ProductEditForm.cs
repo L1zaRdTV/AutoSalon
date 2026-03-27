@@ -24,6 +24,7 @@ namespace AutoSalon
             StartPosition = FormStartPosition.CenterParent;
             MinimumSize = new Size(560, 400);
 
+            var card = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(12));
             var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(16), ColumnCount = 3, RowCount = 8 };
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45));
@@ -52,13 +53,16 @@ namespace AutoSalon
 
             var btnImage = new Button { Text = "Выбрать..." };
             btnImage.Click += (_, __) => SelectImage();
+            UiAssets.StyleSecondaryButton(btnImage);
             layout.Controls.Add(btnImage, 2, 5);
 
             var btnSave = new Button { Text = "Сохранить", Dock = DockStyle.Fill };
             btnSave.Click += (_, __) => SaveProduct();
+            UiAssets.StylePrimaryButton(btnSave);
             layout.Controls.Add(btnSave, 1, 6);
 
-            Controls.Add(layout);
+            card.Controls.Add(layout);
+            Controls.Add(card);
 
             if (_productId.HasValue)
             {

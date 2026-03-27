@@ -17,7 +17,7 @@ namespace AutoSalon
         private readonly DataGridView _gridUsers = new DataGridView { Dock = DockStyle.Fill, AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill };
         private readonly TextBox _txtSearch = new TextBox();
         private readonly ComboBox _cmbSort = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
-        private readonly Label _lblRole = new Label { Dock = DockStyle.Top, Height = 30 };
+        private readonly Label _lblRole = new Label { Dock = DockStyle.Top, Height = 42 };
 
         public MainForm(SessionUser user)
         {
@@ -41,7 +41,7 @@ namespace AutoSalon
         {
             _lblRole.Text = $"Роль: {_user.Role}";
             _lblRole.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            _lblRole.Padding = new Padding(12, 6, 0, 0);
+            _lblRole.Padding = new Padding(16, 10, 0, 0);
             _lblRole.BackColor = UiAssets.Accent;
             _lblRole.ForeColor = Color.White;
 
@@ -67,13 +67,17 @@ namespace AutoSalon
         private TabPage BuildCatalogTab()
         {
             var tab = new TabPage("Каталог");
-            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 50, Padding = new Padding(8), BackColor = UiAssets.Background };
+            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6), BackColor = UiAssets.Background };
             _cmbSort.Items.AddRange(new object[] { "По цене ↑", "По цене ↓", "По названию" });
             _cmbSort.SelectedIndex = 0;
             var btnFilter = new Button { Text = "Поиск/Сортировка" };
             btnFilter.Click += (_, __) => LoadCatalog();
             var btnAddToCart = new Button { Text = "Добавить в корзину" };
             btnAddToCart.Click += (_, __) => AddToCart();
+            UiAssets.StyleSecondaryButton(btnFilter);
+            UiAssets.StylePrimaryButton(btnAddToCart);
+            _txtSearch.Width = 260;
+            _cmbSort.Width = 160;
 
             top.Controls.Add(new Label { Text = "Поиск", Width = 45, TextAlign = ContentAlignment.MiddleLeft });
             top.Controls.Add(_txtSearch);
@@ -86,7 +90,9 @@ namespace AutoSalon
             _gridCatalog.RowPrePaint += GridCatalogOnRowPrePaint;
             UiAssets.ApplyGridStyle(_gridCatalog);
 
-            tab.Controls.Add(_gridCatalog);
+            var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
+            gridPanel.Controls.Add(_gridCatalog);
+            tab.Controls.Add(gridPanel);
             tab.Controls.Add(top);
             return tab;
         }
@@ -94,14 +100,18 @@ namespace AutoSalon
         private TabPage BuildCartTab()
         {
             var tab = new TabPage("Корзина");
-            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 50, Padding = new Padding(8), BackColor = UiAssets.Background };
+            var top = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6), BackColor = UiAssets.Background };
             var btnRemove = new Button { Text = "Удалить из корзины" };
             btnRemove.Click += (_, __) => RemoveFromCart();
             var btnCheckout = new Button { Text = "Оформить заказ" };
             btnCheckout.Click += (_, __) => Checkout();
+            UiAssets.StyleSecondaryButton(btnRemove);
+            UiAssets.StylePrimaryButton(btnCheckout);
             top.Controls.Add(btnRemove);
             top.Controls.Add(btnCheckout);
-            tab.Controls.Add(_gridCart);
+            var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
+            gridPanel.Controls.Add(_gridCart);
+            tab.Controls.Add(gridPanel);
             tab.Controls.Add(top);
             UiAssets.ApplyGridStyle(_gridCart);
             return tab;
@@ -110,7 +120,9 @@ namespace AutoSalon
         private TabPage BuildOrdersTab()
         {
             var tab = new TabPage("История заказов");
-            tab.Controls.Add(_gridOrders);
+            var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
+            gridPanel.Controls.Add(_gridOrders);
+            tab.Controls.Add(gridPanel);
             UiAssets.ApplyGridStyle(_gridOrders);
             return tab;
         }
@@ -118,7 +130,9 @@ namespace AutoSalon
         private TabPage BuildProfileTab()
         {
             var tab = new TabPage("Личный кабинет");
-            var layout = new TableLayoutPanel { Dock = DockStyle.Top, Height = 200, Padding = new Padding(16), ColumnCount = 2 };
+            var shell = UiAssets.CreateSurfacePanel(DockStyle.Top, new Padding(18));
+            shell.Height = 260;
+            var layout = new TableLayoutPanel { Dock = DockStyle.Fill, Height = 220, ColumnCount = 2 };
             var txtName = new TextBox { Text = _user.FullName };
             var txtEmail = new TextBox { Text = _user.Email };
             var txtPhone = new TextBox { Text = _user.Phone };
@@ -142,6 +156,7 @@ namespace AutoSalon
                 _user.Phone = txtPhone.Text.Trim();
                 MessageBox.Show("Данные обновлены.");
             };
+            UiAssets.StylePrimaryButton(btnSave);
 
             layout.Controls.Add(new Label { Text = "Имя" }, 0, 0);
             layout.Controls.Add(txtName, 1, 0);
@@ -150,14 +165,15 @@ namespace AutoSalon
             layout.Controls.Add(new Label { Text = "Телефон" }, 0, 2);
             layout.Controls.Add(txtPhone, 1, 2);
             layout.Controls.Add(btnSave, 1, 3);
-            tab.Controls.Add(layout);
+            shell.Controls.Add(layout);
+            tab.Controls.Add(shell);
             return tab;
         }
 
         private TabPage BuildManagementTab()
         {
             var tab = new TabPage("Управление товарами");
-            var panel = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 44 };
+            var panel = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6) };
             var btnAdd = new Button { Text = "Добавить" };
             var btnEdit = new Button { Text = "Редактировать" };
             var btnDelete = new Button { Text = "Удалить" };
@@ -167,6 +183,9 @@ namespace AutoSalon
             panel.Controls.Add(btnAdd);
             panel.Controls.Add(btnEdit);
             panel.Controls.Add(btnDelete);
+            UiAssets.StylePrimaryButton(btnAdd);
+            UiAssets.StyleSecondaryButton(btnEdit);
+            UiAssets.StyleSecondaryButton(btnDelete);
             if (_user.Role == UserRole.Менеджер)
             {
                 btnDelete.Enabled = false;
@@ -177,7 +196,9 @@ namespace AutoSalon
             UiAssets.ApplyGridStyle(grid);
             grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
             tab.Enter += (_, __) => grid.DataSource = Database.Query("SELECT Id, Title, Description, Price, OldPrice, DiscountPercent, ImagePath FROM dbo.Products ORDER BY Id DESC");
-            tab.Controls.Add(grid);
+            var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
+            gridPanel.Controls.Add(grid);
+            tab.Controls.Add(gridPanel);
             tab.Controls.Add(panel);
             return tab;
         }
@@ -185,14 +206,18 @@ namespace AutoSalon
         private TabPage BuildUsersTab()
         {
             var tab = new TabPage("Пользователи");
-            var panel = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 44 };
+            var panel = new FlowLayoutPanel { Dock = DockStyle.Top, Height = 54, Padding = new Padding(10, 10, 10, 6) };
             var btnRole = new Button { Text = "Сменить роль" };
             var btnDelete = new Button { Text = "Удалить пользователя" };
             btnRole.Click += (_, __) => ChangeUserRole();
             btnDelete.Click += (_, __) => DeleteUser();
             panel.Controls.Add(btnRole);
             panel.Controls.Add(btnDelete);
-            tab.Controls.Add(_gridUsers);
+            UiAssets.StyleSecondaryButton(btnRole);
+            UiAssets.StyleSecondaryButton(btnDelete);
+            var gridPanel = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(10));
+            gridPanel.Controls.Add(_gridUsers);
+            tab.Controls.Add(gridPanel);
             tab.Controls.Add(panel);
             UiAssets.ApplyGridStyle(_gridUsers);
             return tab;
