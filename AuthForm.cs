@@ -15,32 +15,24 @@ namespace AutoSalon
         {
             Text = "AutoSalon — Вход";
             StartPosition = FormStartPosition.CenterScreen;
-            MinimumSize = new Size(560, 360);
+            MinimumSize = new Size(420, 260);
+            MaximumSize = new Size(520, 320);
             Icon = SystemIcons.Application;
-
-            var logo = new PictureBox
-            {
-                SizeMode = PictureBoxSizeMode.Zoom,
-                Dock = DockStyle.Top,
-                Height = 140,
-                Image = UiAssets.CreateLogoBitmap(260, 100)
-            };
 
             var card = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(14));
             var panel = new TableLayoutPanel
             {
-                Dock = DockStyle.Top,
-                Padding = new Padding(24, 18, 24, 10),
-                Height = 220,
+                Dock = DockStyle.Fill,
+                Padding = new Padding(16),
                 RowCount = 5,
                 ColumnCount = 2
             };
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 44));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 14));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 10));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
             panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             _txtLogin.Dock = DockStyle.Fill;
@@ -62,7 +54,6 @@ namespace AutoSalon
 
             card.Controls.Add(panel);
             Controls.Add(card);
-            Controls.Add(logo);
             UiAssets.ApplyFormTheme(this);
         }
 

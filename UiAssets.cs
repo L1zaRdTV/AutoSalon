@@ -5,16 +5,16 @@ namespace AutoSalon
 {
     public static class UiAssets
     {
-        public static readonly Color Background = Color.FromArgb(243, 247, 255);
-        public static readonly Color Surface = Color.White;
-        public static readonly Color SurfaceMuted = Color.FromArgb(248, 250, 255);
-        public static readonly Color Accent = Color.FromArgb(58, 111, 220);
-        public static readonly Color AccentHover = Color.FromArgb(47, 96, 196);
-        public static readonly Color AccentSoft = Color.FromArgb(225, 235, 255);
-        public static readonly Color TextPrimary = Color.FromArgb(28, 36, 52);
-        public static readonly Color TextSecondary = Color.FromArgb(96, 109, 132);
-        public static readonly Color Border = Color.FromArgb(214, 223, 240);
-        public static readonly Color Success = Color.FromArgb(39, 139, 88);
+        public static readonly Color Background = Color.FromArgb(236, 233, 216);
+        public static readonly Color Surface = Color.FromArgb(236, 233, 216);
+        public static readonly Color SurfaceMuted = Color.FromArgb(246, 245, 237);
+        public static readonly Color Accent = Color.FromArgb(10, 36, 106);
+        public static readonly Color AccentHover = Color.FromArgb(29, 56, 134);
+        public static readonly Color AccentSoft = Color.FromArgb(198, 211, 255);
+        public static readonly Color TextPrimary = Color.Black;
+        public static readonly Color TextSecondary = Color.FromArgb(64, 64, 64);
+        public static readonly Color Border = Color.FromArgb(172, 168, 153);
+        public static readonly Color Success = Color.FromArgb(0, 128, 0);
 
         public static Bitmap CreateLogoBitmap(int width, int height)
         {
@@ -46,7 +46,7 @@ namespace AutoSalon
         public static void ApplyFormTheme(Form form)
         {
             form.BackColor = Background;
-            form.Font = new Font("Segoe UI", 10f, FontStyle.Regular);
+            form.Font = new Font("Tahoma", 9f, FontStyle.Regular);
             form.ForeColor = TextPrimary;
             ApplyThemeToControls(form.Controls);
         }
@@ -57,6 +57,7 @@ namespace AutoSalon
             {
                 Dock = dock,
                 BackColor = Surface,
+                BorderStyle = BorderStyle.FixedSingle,
                 Padding = padding ?? new Padding(0),
                 Margin = new Padding(12)
             };
@@ -64,33 +65,20 @@ namespace AutoSalon
 
         public static void StylePrimaryButton(Button button)
         {
-            button.FlatStyle = FlatStyle.Flat;
-            button.FlatAppearance.BorderColor = Accent;
-            button.FlatAppearance.BorderSize = 1;
-            button.FlatAppearance.MouseOverBackColor = AccentHover;
-            button.FlatAppearance.MouseDownBackColor = AccentHover;
-            button.BackColor = Accent;
-            button.ForeColor = Color.White;
-            button.Padding = new Padding(10, 5, 10, 5);
+            button.UseVisualStyleBackColor = true;
+            button.FlatStyle = FlatStyle.Standard;
+            button.BackColor = SystemColors.Control;
+            button.ForeColor = TextPrimary;
+            button.Padding = new Padding(8, 4, 8, 4);
             button.Cursor = Cursors.Hand;
             button.AutoSize = true;
             button.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            button.Font = new Font("Segoe UI Semibold", 10f, FontStyle.Bold);
+            button.Font = new Font("Tahoma", 9f, FontStyle.Regular);
         }
 
         public static void StyleSecondaryButton(Button button)
         {
-            button.FlatStyle = FlatStyle.Flat;
-            button.FlatAppearance.BorderColor = Border;
-            button.FlatAppearance.BorderSize = 1;
-            button.FlatAppearance.MouseOverBackColor = SurfaceMuted;
-            button.BackColor = Surface;
-            button.ForeColor = TextPrimary;
-            button.Padding = new Padding(10, 5, 10, 5);
-            button.Cursor = Cursors.Hand;
-            button.AutoSize = true;
-            button.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            button.Font = new Font("Segoe UI Semibold", 10f, FontStyle.Bold);
+            StylePrimaryButton(button);
         }
 
         private static void ApplyThemeToControls(Control.ControlCollection controls)
@@ -100,9 +88,9 @@ namespace AutoSalon
                 if (control is TabControl tabControl)
                 {
                     tabControl.Appearance = TabAppearance.Normal;
-                    tabControl.ItemSize = new Size(150, 36);
+                    tabControl.ItemSize = new Size(140, 28);
                     tabControl.SizeMode = TabSizeMode.Fixed;
-                    tabControl.Padding = new Point(18, 8);
+                    tabControl.Padding = new Point(10, 4);
                     tabControl.BackColor = Background;
                 }
                 else if (control is TabPage tabPage)
@@ -120,21 +108,21 @@ namespace AutoSalon
                 }
                 else if (control is TextBox textBox)
                 {
-                    textBox.BorderStyle = BorderStyle.FixedSingle;
+                    textBox.BorderStyle = BorderStyle.Fixed3D;
                     textBox.BackColor = Surface;
                     textBox.ForeColor = TextPrimary;
                     textBox.Margin = new Padding(3, 5, 3, 5);
                 }
                 else if (control is ComboBox comboBox)
                 {
-                    comboBox.FlatStyle = FlatStyle.Flat;
+                    comboBox.FlatStyle = FlatStyle.Standard;
                     comboBox.BackColor = Surface;
                     comboBox.ForeColor = TextPrimary;
                     comboBox.Margin = new Padding(3, 5, 3, 5);
                 }
                 else if (control is NumericUpDown num)
                 {
-                    num.BorderStyle = BorderStyle.FixedSingle;
+                    num.BorderStyle = BorderStyle.Fixed3D;
                     num.BackColor = Surface;
                     num.ForeColor = TextPrimary;
                     num.Margin = new Padding(3, 5, 3, 5);
@@ -142,7 +130,7 @@ namespace AutoSalon
                 else if (control is Label label)
                 {
                     label.ForeColor = TextPrimary;
-                    label.Font = new Font("Segoe UI Semibold", 10f, FontStyle.Bold);
+                    label.Font = new Font("Tahoma", 9f, FontStyle.Regular);
                     label.Margin = new Padding(3, 8, 3, 3);
                 }
                 else if (control is GroupBox group)
@@ -153,7 +141,7 @@ namespace AutoSalon
                 }
                 else if (control is TableLayoutPanel)
                 {
-                    control.BackColor = Background;
+                    control.BackColor = Surface;
                 }
                 else if (control is FlowLayoutPanel flow)
                 {
@@ -172,7 +160,7 @@ namespace AutoSalon
         public static void ApplyGridStyle(DataGridView grid)
         {
             grid.BackgroundColor = Surface;
-            grid.BorderStyle = BorderStyle.None;
+            grid.BorderStyle = BorderStyle.Fixed3D;
             grid.EnableHeadersVisualStyles = false;
             grid.GridColor = Border;
             grid.RowHeadersVisible = false;
@@ -183,12 +171,12 @@ namespace AutoSalon
             grid.DefaultCellStyle.ForeColor = TextPrimary;
             grid.DefaultCellStyle.SelectionBackColor = AccentSoft;
             grid.DefaultCellStyle.SelectionForeColor = TextPrimary;
-            grid.DefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Regular);
-            grid.ColumnHeadersDefaultCellStyle.BackColor = Accent;
-            grid.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-            grid.ColumnHeadersHeight = 40;
-            grid.RowTemplate.Height = 34;
+            grid.DefaultCellStyle.Font = new Font("Tahoma", 9, FontStyle.Regular);
+            grid.ColumnHeadersDefaultCellStyle.BackColor = SurfaceMuted;
+            grid.ColumnHeadersDefaultCellStyle.ForeColor = TextPrimary;
+            grid.ColumnHeadersDefaultCellStyle.Font = new Font("Tahoma", 9, FontStyle.Bold);
+            grid.ColumnHeadersHeight = 30;
+            grid.RowTemplate.Height = 26;
             grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
         }
     }
