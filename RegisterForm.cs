@@ -19,6 +19,7 @@ namespace AutoSalon
             MinimumSize = new Size(540, 350);
             Icon = SystemIcons.Application;
 
+            var card = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(14));
             var panel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 2, RowCount = 6 };
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
@@ -41,9 +42,11 @@ namespace AutoSalon
 
             var btn = new Button { Text = "Создать аккаунт", Dock = DockStyle.Fill };
             btn.Click += (_, __) => CreateUser();
+            UiAssets.StylePrimaryButton(btn);
             panel.Controls.Add(btn, 1, 4);
 
-            Controls.Add(panel);
+            card.Controls.Add(panel);
+            Controls.Add(card);
             UiAssets.ApplyFormTheme(this);
         }
 

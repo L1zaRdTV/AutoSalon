@@ -22,14 +22,16 @@ namespace AutoSalon
             {
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Dock = DockStyle.Top,
-                Height = 120,
+                Height = 140,
                 Image = UiAssets.CreateLogoBitmap(260, 100)
             };
 
+            var card = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(14));
             var panel = new TableLayoutPanel
             {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(24),
+                Dock = DockStyle.Top,
+                Padding = new Padding(24, 18, 24, 10),
+                Height = 220,
                 RowCount = 5,
                 ColumnCount = 2
             };
@@ -53,10 +55,13 @@ namespace AutoSalon
             btnLogin.Click += (_, __) => Login();
             var btnRegister = new Button { Text = "Регистрация", Dock = DockStyle.Fill, Height = 36 };
             btnRegister.Click += (_, __) => Register();
+            UiAssets.StylePrimaryButton(btnLogin);
+            UiAssets.StyleSecondaryButton(btnRegister);
             panel.Controls.Add(btnLogin, 0, 3);
             panel.Controls.Add(btnRegister, 1, 3);
 
-            Controls.Add(panel);
+            card.Controls.Add(panel);
+            Controls.Add(card);
             Controls.Add(logo);
             UiAssets.ApplyFormTheme(this);
         }
