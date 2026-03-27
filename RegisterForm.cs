@@ -16,18 +16,19 @@ namespace AutoSalon
         {
             Text = "Регистрация";
             StartPosition = FormStartPosition.CenterParent;
-            MinimumSize = new Size(540, 350);
+            MinimumSize = new Size(420, 300);
+            MaximumSize = new Size(540, 380);
             Icon = SystemIcons.Application;
 
             var card = UiAssets.CreateSurfacePanel(DockStyle.Fill, new Padding(14));
-            var panel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(24), ColumnCount = 2, RowCount = 6 };
+            var panel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(16), ColumnCount = 2, RowCount = 6 };
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));
             panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 42));
-            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 50));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+            panel.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
             panel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
             panel.Controls.Add(new Label { Text = "ФИО" }, 0, 0);
