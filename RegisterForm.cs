@@ -33,7 +33,7 @@ namespace AutoSalon
 
             panel.Controls.Add(new Label { Text = "ФИО" }, 0, 0);
             panel.Controls.Add(_txtName, 1, 0);
-            panel.Controls.Add(new Label { Text = "Email" }, 0, 1);
+            panel.Controls.Add(new Label { Text = "Эл. почта" }, 0, 1);
             panel.Controls.Add(_txtEmail, 1, 1);
             panel.Controls.Add(new Label { Text = "Телефон" }, 0, 2);
             panel.Controls.Add(_txtPhone, 1, 2);
